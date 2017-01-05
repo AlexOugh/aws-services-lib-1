@@ -1,14 +1,15 @@
 {
-  "name": "zipper",
-  "version": "1.0.0",
+  "name": "aws-services-lib",
+  "version": "0.1.0",
   "description": "",
-  "main": "zipper.js",
+  "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "archiver": "^0.14.4"
+    "aws-sdk": "^2.7.21",
+    "sleep": "^3.0.0"
   }
 }
