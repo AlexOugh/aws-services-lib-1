@@ -17,12 +17,12 @@ module.exports = {
   findAccountPolicy: function(input) {
     var lambda = this.findService(input);
     var params = {
-      FunctionName: input.functionName,
+      FunctionName: input.functionArn,
     };
     return lambda.getPolicy(params).promise().then(data => {
       // { Policy: '{"Version":"2012-10-17","Statement":[{"Action":"lambda:InvokeFunction","Resource":"arn:aws:lambda:us-east-1:089476987273:function:SSOProxyElastigroup-SpotinstLambdaFunction-15P3UDNPADGF4","Effect":"Allow","Principal":{"AWS":"arn:aws:iam::290093585298:root"},"Sid":"Id-133"}],"Id":"default"}' }
       console.log(data);
-      var lambdaArn = "arn:aws:lambda:" + input.region + ":" + input.account + ":function:" + input.functionName
+      var lambdaArn = input.functionArn;
       console.log(lambdaArn);
       var policy = JSON.parse(data.Policy)
       return policy.Statement.filter(statement =>
@@ -42,7 +42,7 @@ module.exports = {
     var statementId = (input.statementId) ? input.statementId : "sns_invoke";
     var params = {
       Action: "lambda:invokeFunction",
-      FunctionName: input.functionName,
+      FunctionName: input.functionArn,
       Principal: principal,
       StatementId: statementId,
     };
