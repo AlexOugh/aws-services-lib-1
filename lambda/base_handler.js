@@ -44,7 +44,7 @@ exports.handler = (event, context) => {
     try {
       var params = postData;
       if (method == 'get') params = queryParams;
-      this[method](params, function(err, data) {
+      this[method](event, params, function(err, data) {
         if (err) {
           console.log(err);
           sendFailureResponse({error: 'not permitted'}, 403, context);
