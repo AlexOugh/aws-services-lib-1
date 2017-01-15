@@ -1,8 +1,6 @@
 
 'use strict';
 
-var auth = require('../auth/sso');
-
 exports.handler = (event, context) => {
 
   console.log('Received event:', JSON.stringify(event, null, 2));
@@ -10,56 +8,27 @@ exports.handler = (event, context) => {
   var method = event.httpMethod.toLowerCase();
   var paths = event.path.split('/');
   var path = paths[paths.length-1];
-  var headers = event.headers;
   var queryParams = event.queryStringParameters;
   var postData = (event.body) ? JSON.parse(event.body) : null;
 
-  if (path == 'auth' && method == 'post') {
-    auth.authenticate(postData.username, postData.password).then(data => {
-      console.log(data);
-      var ret = JSON.parse(data);
-      if (!ret.refresh_token) {
-        sendFailureResponse({error: 'unauthorized'}, 401, context);
+  try {
+    var params = postData;
+    if (method == 'get') params = queryParams;
+    this[method](params, function(err, data) {
+      if (err) {
+        console.log(err);
+        sendFailureResponse({error: 'not permitted'}, 403, context);
       }
       else {
-        sendSuccessResponse(ret, context);
+        console.log(data);
+        sendSuccessResponse(data, context);
       }
-    }).catch(err => {
-      console.log(err);
-      sendFailureResponse({error: 'unauthorized'}, 401, context);
     });
-    return;
   }
-
-  // authorize first
-  auth.authorize(headers.Authorization).then(data => {
-    /*console.log(data);
-    var ret = JSON.parse(data);
-    if (!ret.refresh_token) {
-      sendFailureResponse({error: 'not permitted'}, 403, context);
-    }
-    return ret.refresh_token;*/
-    return '';
-  }).then(refreshToken => {
-    try {
-      var params = postData;
-      if (method == 'get') params = queryParams;
-      this[method](params, function(err, data) {
-        if (err) {
-          console.log(err);
-          sendFailureResponse({error: 'not permitted'}, 403, context);
-        }
-        else {
-          console.log(data);
-          sendSuccessResponse(data, context);
-        }
-      });
-    }
-    catch(err) {
-      console.log(err);
-      sendNotPermittedMethodResponse(event.path, event.httpMethod, context);
-    }
-  });
+  catch(err) {
+    console.log(err);
+    sendNotPermittedMethodResponse(event.path, event.httpMethod, context);
+  }
 }
 
 function sendNotPermittedMethodResponse(path, method, context) {
