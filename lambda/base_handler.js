@@ -11,9 +11,16 @@ exports.handler = (event, context) => {
   var queryParams = event.queryStringParameters;
   var postData = (event.body) ? JSON.parse(event.body) : null;
 
+  var credentials = null;
+  if (event.headers.Credentials) {
+    credentials = JSON.parse(event.headers.Credentials)
+  }
+  console.log(credentials);
+
   try {
     var params = postData;
     if (method == 'get') params = queryParams;
+    params['Credentials'] = credentials;
     this[method](params, function(err, data) {
       if (err) {
         console.log(err);
