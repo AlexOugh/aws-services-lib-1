@@ -288,8 +288,19 @@ function AWSS3Bucket() {
       return;
     }
 
+    self.callbackFindOne = function(err, data) {
+      if (err) {
+        console.log("no policy found");
+        return null;
+      }
+      else {
+        console.log("policy found");
+        return data;
+       }
+    }
+
     var s3 = me.preRun(self, input);
-    s3.getBucketPolicy(params, me.callback);
+    s3.getBucketPolicy(params, me.callbackFindOne);
   }
 
   me.findBucketNotificationConfiguration = function(input, callback) {
