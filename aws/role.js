@@ -181,6 +181,40 @@ function AWSRole() {
   //  }
   // }
 
+  me.attachPolicy = function(input, callback) {
+    var params = {
+      PolicyArn: input.policyArn,
+      RoleName: input.roleName
+    };
+    var self = arguments.callee;
+
+    if (callback) {
+      var iam = me.findService(input);
+      iam.attachRolePolicy(params, callback);
+      return;
+    }
+
+    var iam = me.preRun(self, input);
+    iam.attachRolePolicy(params, me.callback);
+  }
+
+  me.detachPolicy = function(input, callback) {
+    var params = {
+      PolicyArn: input.policyArn,
+      RoleName: input.roleName
+    };
+    var self = arguments.callee;
+
+    if (callback) {
+      var iam = me.findService(input);
+      iam.detachRolePolicy(params, callback);
+      return;
+    }
+
+    var iam = me.preRun(self, input);
+    iam.detachRolePolicy(params, me.callback);
+  }
+
   me.findInlinePolicy = function(input, callback) {
 
     var params = {
