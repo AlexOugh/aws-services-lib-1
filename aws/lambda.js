@@ -192,6 +192,54 @@ function AWSLambda() {
       }
     });
   }
+
+  me.federate = function(input, callback) {
+
+    var fedParams = {
+      roles: input.roles,
+      sessionName: input.sessionName,
+      durationSeconds: input.durationSeconds
+    }
+
+    var params = {
+      FunctionName: input.functionName,
+      //ClientContext: 'STRING_VALUE',
+      //InvocationType: 'Event | RequestResponse | DryRun',
+      //LogType: 'None | Tail',
+      Payload: JSON.stringify(fedParams),
+      //Qualifier: 'STRING_VALUE'
+    };
+
+    var self = arguments.callee;
+
+    if (callback) {
+      var lambda = me.findService(input);
+      lambda.invoke(params, callback);
+      return;
+    }
+
+    self.callbackFind = function(data) {
+      credentials = JSON.parse(data.Payload).body.Credentials;
+      if (credentials) {
+        return new AWS.Credentials({
+          accessKeyId: credentials.AccessKeyId,
+          secretAccessKey: credentials.SecretAccessKey,
+          sessionToken: credentials.SessionToken
+        });
+      }
+      else {
+        console.log(data);
+        throw new Error("failed to federate");
+      }
+    }
+
+    self.addParams = function(found) {
+      self.params.creds = found;
+    }
+
+    var lambda = me.preRun(self, input);
+    lambda.invoke(params, me.callbackFind);
+  }
 }
 
 module.exports = AWSLambda

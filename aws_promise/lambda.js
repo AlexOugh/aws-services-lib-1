@@ -53,5 +53,34 @@ module.exports = {
       params['SourceArn'] = input.sourceArn;
     }
     return lambda.addPermission(params).promise();
+  },
+
+  federate: function(input, callback) {
+    var lambda = this.findService(input);
+    var fedParams = {
+      roles: input.roles,
+      sessionName: input.sessionName,
+      durationSeconds: input.durationSeconds
+    }
+    var params = {
+      FunctionName: input.functionName,
+      //ClientContext: 'STRING_VALUE',
+      //InvocationType: 'Event | RequestResponse | DryRun',
+      //LogType: 'None | Tail',
+      Payload: JSON.stringify(fedParams),
+      //Qualifier: 'STRING_VALUE'
+    };
+    return lambda.invoke(params).promise().then(function(data) {
+      credentials = JSON.parse(data.Payload).body.Credentials;
+      if (credentials) {
+        return new AWS.Credentials({
+          accessKeyId: credentials.AccessKeyId,
+          secretAccessKey: credentials.SecretAccessKey,
+          sessionToken: credentials.SessionToken
+        });
+      }
+      else {
+        throw new Error("failed to federate");
+    });
   }
 }
