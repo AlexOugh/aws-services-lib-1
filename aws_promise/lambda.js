@@ -81,6 +81,7 @@ module.exports = {
       }
       else {
         throw new Error("failed to federate");
+      }
     });
   }
 }
