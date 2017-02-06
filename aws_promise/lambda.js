@@ -63,7 +63,7 @@ module.exports = {
       durationSeconds: input.durationSeconds
     }
     var params = {
-      FunctionName: input.functionName,
+      FunctionName: input.fedFunctionName,
       //ClientContext: 'STRING_VALUE',
       //InvocationType: 'Event | RequestResponse | DryRun',
       //LogType: 'None | Tail',
