@@ -21,6 +21,11 @@ exports.handler = (event, context) => {
   }
   console.log(credentials);
 
+  if (authorizer == null && credentials == null) {
+    console.log("either Credentials or Customer Authorization result must be given");
+    sendFailureResponse({error: 'not permitted'}, 403, context, authorizer, resType);
+  }
+
   try {
     var params = postData;
     if (method == 'get') params = queryParams;
