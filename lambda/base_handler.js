@@ -9,7 +9,8 @@ exports.handler = (event, context) => {
   var paths = event.path.split('/');
   var path = paths[paths.length-1];
   var queryParams = event.queryStringParameters;
-  var postData = (event.body) ? event.body : null;
+  if (queryParams == null)  queryParams = {};
+  var postData = (event.body) ? event.body : {};
   if (postData && typeof(postData) == "string") postData = JSON.parse(postData);
   var authorizer = (event.requestContext) ? event.requestContext.authorizer: null;
   // { "refresh_token": "ffffffff-ffff-ffff-ffff-ffffffffffff", "principalId": "user|a1b2c3d4" }
