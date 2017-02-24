@@ -16,6 +16,12 @@ exports.handler = (event, context) => {
   // { "refresh_token": "ffffffff-ffff-ffff-ffff-ffffffffffff", "principalId": "user|a1b2c3d4" }
   var resType = (event.resType) ? event.resType: null;
 
+  // temporary fix for the CORS issue of Custom Authorizer in non 200 Http responses
+  if (authorizer && authorizer.error) {
+    // authorization is failed, so return failure response
+    sendFailureResponse({error: authorizer.error}, 403, context, authorizer);
+  }
+
   var credentials = null;
   if (event.headers.Credentials) {
     credentials = JSON.parse(new Buffer(event.headers.Credentials, 'base64').toString())
@@ -34,7 +40,7 @@ exports.handler = (event, context) => {
     this[method](params, function(err, data) {
       if (err) {
         console.log(err);
-        sendFailureResponse({error: 'not permitted'}, 403, context, authorizer, resType);
+        sendFailureResponse({error: err}, 500, context, authorizer, resType);
       }
       else {
         console.log(data);
