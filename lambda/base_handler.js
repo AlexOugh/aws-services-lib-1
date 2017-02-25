@@ -37,6 +37,8 @@ exports.handler = (event, context) => {
     var params = postData;
     if (method == 'get') params = queryParams;
     params['Credentials'] = credentials;
+    if (authorizer) params['userGuid'] = authorizer.user_guid;
+    console.log('params : ', params);
     this[method](params, function(err, data) {
       if (err) {
         console.log(err);
@@ -78,7 +80,7 @@ function sendFailureResponse(err, statusCode, context, authorizer, resType) {
 }
 
 function sendResponse(responseBody, statusCode, context, authorizer, resType) {
-  if (authorizer) responseBody['__authorizer'] = authorizer
+  //if (authorizer) responseBody['__authorizer'] = authorizer
   var response = {
       statusCode: statusCode,
   };
