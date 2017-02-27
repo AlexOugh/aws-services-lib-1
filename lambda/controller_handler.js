@@ -26,6 +26,9 @@ exports.handler = (event, context) => {
   if (event.headers.credentials) {
     credentials = JSON.parse(new Buffer(event.headers.credentials, 'base64').toString())
   }
+  else if (event.headers.Credentials) {
+    credentials = JSON.parse(new Buffer(event.headers.Credentials, 'base64').toString())
+  }
   console.log(credentials);
 
   if (authorizer == null && credentials == null) {
