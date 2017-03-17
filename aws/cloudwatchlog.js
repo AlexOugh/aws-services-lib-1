@@ -294,6 +294,27 @@ function AWSCloudWatchLog() {
     var cloudwatchlogs = me.preRun(self, input);
     cloudwatchlogs.deleteMetricFilter(params, me.callback);
   }
+
+  me.putSubscriptionFilter = function(input, callback) {
+    var params = {
+      destinationArn: input.destinationArn,
+      filterName: input.filterName,
+      filterPattern: input.filterPattern,
+      logGroupName: input.groupName
+      //distribution: 'Random | ByLogStream',
+      //roleArn: 'STRING_VALUE'
+    };
+    var self = arguments.callee;
+
+    if (callback) {
+      var cloudwatchlogs = me.findService(input);
+      cloudwatchlogs.putSubscriptionFilter(params, callback);
+      return;
+    }
+
+    var cloudwatchlogs = me.preRun(self, input);
+    cloudwatchlogs.putSubscriptionFilter(params, me.callback});
+  }
 }
 
 module.exports = AWSCloudWatchLog
