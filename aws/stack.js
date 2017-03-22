@@ -48,8 +48,9 @@ function AWSCloudformation() {
     var params = {
       StackName: input.stackName,
       Capabilities: ['CAPABILITY_IAM'],
-      TemplateBody: input.templateStr
     };
+    if (input.templateStr)  params.TemplateBody = input.templateStr;
+    if (input.templateUrl)  params.TemplateURL = input.templateUrl;
     if (input.parameters) params.Parameters = input.parameters;
 
     console.log(params);
@@ -67,6 +68,33 @@ function AWSCloudformation() {
 
     var cloudformation = me.preRun(self, input);
     cloudformation.createStack(params, me.callback);
+  }
+
+  me.updateStack = function(input, callback) {
+
+    var params = {
+      StackName: input.stackName,
+      Capabilities: ['CAPABILITY_IAM'],
+    };
+    if (input.templateStr)  params.TemplateBody = input.templateStr;
+    if (input.templateUrl)  params.TemplateURL = input.templateUrl;
+    if (input.parameters) params.Parameters = input.parameters;
+
+    console.log(params);
+    var self = arguments.callee;
+
+    if (callback) {
+      var cloudformation = me.findService(input);
+      cloudformation.updateStack(params, callback);
+      return;
+    }
+
+    self.addParams = function(data) {
+      self.params.stackId = data.StackId;
+    }
+
+    var cloudformation = me.preRun(self, input);
+    cloudformation.updateStack(params, me.callback);
   }
 
   me.deleteStack = function(input, callback) {

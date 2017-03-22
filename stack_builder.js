@@ -24,6 +24,46 @@ function StackBuilder() {
     else console.log(data);
   }
 
+  function deleteStack(input) {
+    stack.deleteStack(input, function(err, data) {
+      if (err)  callback(err);
+      else {
+        stack.waitForComplete(input, function(err, data) {
+          if (err)  callback(err);
+          else callback(null, data);
+        })
+      }
+    });
+  }
+
+
+  function waitForCompleteBeforeCreate(input) {
+    stack.waitForComplete(input, function(err, data) {
+      if (err) {
+        stack.createStack(input);
+      }
+      else {
+        if (input.status == "ROLLBACK_FAILED" || input.status == "ROLLBACK_COMPLETE") {
+          stack.deleteStack(input);
+        }
+        else {
+          stack.updateStack(input);
+        }
+      }
+    });
+  }
+
+  function waitForCompleteAfterDelete(input) {
+    stack.waitForComplete(input, function(err, data) {
+      if (err) {
+        stack.createStack(input);
+      }
+      else {
+        failed(input);
+      }
+    });
+  }
+
   function isCreateSucceeded(input) {
     if (input.status == "CREATE_COMPLETE")  succeeded(input);
     failed(input);
@@ -39,9 +79,27 @@ function StackBuilder() {
     if(callback)  me.callback = callback;
 
     var flows = [
-      {func:stack.findStack, success:stack.waitForComplete, failure:stack.createStack, error:errored},
+      {func:stack.findStack, success:waitForCompleteBeforeCreate, failure:stack.createStack, error:errored},
+      {func:waitForCompleteBeforeCreate, success:null, failure:stack.createStack, error:errored},
+      {func:stack.deleteStack, success:waitForCompleteAfterDelete, failure:failed, error:errored},
+      {func:waitForCompleteAfterDelete, success:failed, failure:stack.createStack, error:errored},
+      {func:stack.updateStack, success:stack.waitForComplete, failure:failed, error:errored},
       {func:stack.createStack, success:stack.waitForComplete, failure:failed, error:errored},
       {func:stack.waitForComplete, success:isCreateSucceeded, failure:failed, error:errored},
+    ];
+    stack.flows = flows;
+
+    flows[0].func(input);
+  }
+
+  me.update = function(input, callback) {
+
+    if(callback)  me.callback = callback;
+
+    var flows = [
+      {func:stack.findStack, success:stack.updateStack, failure:failed, error:errored},
+      {func:stack.updateStack, success:stack.waitForComplete, failure:failed, error:errored},
+      {func:stack.waitForComplete, success:isUpdateSucceeded, failure:succeeded, error:errored},
     ];
     stack.flows = flows;
 
