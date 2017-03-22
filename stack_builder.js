@@ -47,7 +47,7 @@ function StackBuilder() {
           stack.deleteStack(input);
         }
         else {
-          stack.updateStack(input);
+          updateStack(input);
         }
       }
     });
@@ -64,8 +64,24 @@ function StackBuilder() {
     });
   }
 
+  function updateStack(input) {
+    stack.updateStack(input, function(err, data) {
+      if (err) {
+        console.log("error in update : " + err);
+        if (err.toString().indexOf("No updates are to be performed.") >= 0) {
+          console.log("no update is necessary, so just return true");
+          succeeded(input);
+        }
+        else failed(input);
+      }
+      else {
+        stack.waitForComplete(input);
+      }
+    });
+  }
+
   function isCreateSucceeded(input) {
-    if (input.status == "CREATE_COMPLETE")  succeeded(input);
+    if (input.status == "CREATE_COMPLETE" || input.status == "UPDATE_COMPLETE")  succeeded(input);
     failed(input);
   }
 
@@ -80,10 +96,10 @@ function StackBuilder() {
 
     var flows = [
       {func:stack.findStack, success:waitForCompleteBeforeCreate, failure:stack.createStack, error:errored},
-      {func:waitForCompleteBeforeCreate, success:null, failure:stack.createStack, error:errored},
+      {func:waitForCompleteBeforeCreate, success:null, failure:null, error:errored},
       {func:stack.deleteStack, success:waitForCompleteAfterDelete, failure:failed, error:errored},
-      {func:waitForCompleteAfterDelete, success:failed, failure:stack.createStack, error:errored},
-      {func:stack.updateStack, success:stack.waitForComplete, failure:failed, error:errored},
+      {func:waitForCompleteAfterDelete, success:null, failure:null, error:errored},
+      {func:updateStack, success:null, failure:null, error:errored},
       {func:stack.createStack, success:stack.waitForComplete, failure:failed, error:errored},
       {func:stack.waitForComplete, success:isCreateSucceeded, failure:failed, error:errored},
     ];
