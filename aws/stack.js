@@ -78,6 +78,7 @@ function AWSCloudformation() {
     };
     if (input.templateStr)  params.TemplateBody = input.templateStr;
     if (input.templateUrl)  params.TemplateURL = input.templateUrl;
+    if (input.usePreviousTemplate != undefined)  params.UsePreviousTemplate = input.usePreviousTemplate;
     if (input.parameters) params.Parameters = input.parameters;
 
     console.log(params);
