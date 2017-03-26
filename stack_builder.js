@@ -3,39 +3,15 @@ var stack = new (require('./aws/stack.js'))();
 
 function StackBuilder() {
 
-  this.callback = callback;
-
   var me = this;
 
   function succeeded(input) {
-    me.callback(null, true);
+    input.callback(null, true);
   }
 
   function failed(input) {
-    me.callback(null, false);
+    input.callback(null, false);
   }
-
-  function errored(err) {
-    me.callback(err, null);
-  }
-
-  function callback(err, data) {
-    if(err) console.log(err);
-    else console.log(data);
-  }
-
-  function deleteStack(input) {
-    stack.deleteStack(input, function(err, data) {
-      if (err)  callback(err);
-      else {
-        stack.waitForComplete(input, function(err, data) {
-          if (err)  callback(err);
-          else callback(null, data);
-        })
-      }
-    });
-  }
-
 
   function waitForCompleteBeforeCreate(input) {
     stack.waitForComplete(input, function(err, data) {
@@ -56,6 +32,7 @@ function StackBuilder() {
   function waitForCompleteAfterDelete(input) {
     stack.waitForComplete(input, function(err, data) {
       if (err) {
+        console.log("#### error in waitForCompleteAfterDelete : " + err);
         stack.createStack(input);
       }
       else {
@@ -92,7 +69,21 @@ function StackBuilder() {
 
   me.launch = function(input, callback) {
 
-    if(callback)  me.callback = callback;
+    function errored(err) {
+      input.callback(err, null);
+    }
+
+    function defaultCallback(err, data) {
+      if(err) console.log(err);
+      else console.log(data);
+    }
+
+    if(callback)  input.callback = callback;
+    else input.callback = defaultCallback;
+
+    function errored(err) {
+      input.callback(err, null);
+    }
 
     var flows = [
       {func:stack.findStack, success:waitForCompleteBeforeCreate, failure:stack.createStack, error:errored},
@@ -110,7 +101,17 @@ function StackBuilder() {
 
   me.update = function(input, callback) {
 
-    if(callback)  me.callback = callback;
+    function errored(err) {
+      input.callback(err, null);
+    }
+
+    function defaultCallback(err, data) {
+      if(err) console.log(err);
+      else console.log(data);
+    }
+
+    if(callback)  input.callback = callback;
+    else input.callback = defaultCallback;
 
     var flows = [
       {func:stack.findStack, success:stack.updateStack, failure:failed, error:errored},
@@ -124,7 +125,17 @@ function StackBuilder() {
 
   me.drop = function(input, callback) {
 
-    if(callback)  me.callback = callback;
+    function errored(err) {
+      input.callback(err, null);
+    }
+
+    function defaultCallback(err, data) {
+      if(err) console.log(err);
+      else console.log(data);
+    }
+
+    if(callback)  input.callback = callback;
+    else input.callback = defaultCallback;
 
     var flows = [
       {func:stack.findStack, success:stack.deleteStack, failure:succeeded, error:errored},
