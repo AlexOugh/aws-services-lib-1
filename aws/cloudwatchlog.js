@@ -313,7 +313,7 @@ function AWSCloudWatchLog() {
     }
 
     var cloudwatchlogs = me.preRun(self, input);
-    cloudwatchlogs.putSubscriptionFilter(params, me.callback});
+    cloudwatchlogs.putSubscriptionFilter(params, me.callback);
   }
 }
 
