@@ -52,7 +52,8 @@ function StackBuilder() {
         else failed(input);
       }
       else {
-        stack.waitForComplete(input);
+        if (input.nowait) return succeeded(input);
+        else stack.waitForComplete(input);
       }
     });
   }
@@ -86,10 +87,15 @@ function StackBuilder() {
       {func:waitForCompleteBeforeCreate, success:null, failure:null, error:errored},
       {func:stack.deleteStack, success:waitForCompleteAfterDelete, failure:failed, error:errored},
       {func:waitForCompleteAfterDelete, success:null, failure:null, error:errored},
-      {func:updateStack, success:null, failure:null, error:errored},
-      {func:stack.createStack, success:stack.waitForComplete, failure:failed, error:errored},
-      {func:stack.waitForComplete, success:isCreateSucceeded, failure:failed, error:errored},
+      {func:updateStack, success:null, failure:null, error:errored}
     ];
+    if (input.nowait) {
+      flows.push({func:stack.createStack, success:succeeded, failure:failed, error:errored});
+    }
+    else {
+      flows.push({func:stack.createStack, success:stack.waitForComplete, failure:failed, error:errored});
+      flows.push({func:stack.waitForComplete, success:isCreateSucceeded, failure:failed, error:errored});
+    }
     stack.flows = flows;
 
     flows[0].func(input);
@@ -111,9 +117,14 @@ function StackBuilder() {
 
     var flows = [
       {func:stack.findStack, success:stack.updateStack, failure:failed, error:errored},
-      {func:stack.updateStack, success:stack.waitForComplete, failure:failed, error:errored},
-      {func:stack.waitForComplete, success:isUpdateSucceeded, failure:succeeded, error:errored},
     ];
+    if (input.nowait) {
+      flows.push({func:stack.updateStack, success:succeeded, failure:failed, error:errored});
+    }
+    else {
+      flows.push({func:stack.updateStack, success:stack.waitForComplete, failure:failed, error:errored});
+      flows.push({func:stack.waitForComplete, success:isCreateSucceeded, failure:failed, error:errored});
+    }
     stack.flows = flows;
 
     flows[0].func(input);
@@ -135,8 +146,59 @@ function StackBuilder() {
 
     var flows = [
       {func:stack.findStack, success:stack.deleteStack, failure:succeeded, error:errored},
-      {func:stack.deleteStack, success:stack.waitForComplete, failure:failed, error:errored},
-      {func:stack.waitForComplete, success:isDeleteSucceeded, failure:succeeded, error:errored},
+    ];
+    if (input.nowait) {
+      flows.push({func:stack.deleteStack, success:succeeded, failure:failed, error:errored});
+    }
+    else {
+      flows.push({func:stack.deleteStack, success:stack.waitForComplete, failure:failed, error:errored});
+      flows.push({func:stack.waitForComplete, success:isDeleteSucceeded, failure:failed, error:errored});
+    }
+    stack.flows = flows;
+
+    flows[0].func(input);
+  }
+
+  me.waitForlaunch = function(input, callback) {
+
+    function errored(err) {
+      input.callback(err, null);
+    }
+
+    function defaultCallback(err, data) {
+      if(err) console.log(err);
+      else console.log(data);
+    }
+
+    if(callback)  input.callback = callback;
+    else input.callback = defaultCallback;
+
+    var flows = [
+      {func:stack.waitForComplete, success:isCreateSucceeded, failure:failed, error:errored}
+    ];
+    stack.flows = flows;
+
+    flows[0].func(input);
+  }
+
+  me.waitForupdate = me.waitForlaunch;
+
+  me.waitFordrop = function(input, callback) {
+
+    function errored(err) {
+      input.callback(err, null);
+    }
+
+    function defaultCallback(err, data) {
+      if(err) console.log(err);
+      else console.log(data);
+    }
+
+    if(callback)  input.callback = callback;
+    else input.callback = defaultCallback;
+
+    var flows = [
+      {func:stack.waitForComplete, success:isDeleteSucceeded, failure:succeeded, error:errored}
     ];
     stack.flows = flows;
 
