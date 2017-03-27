@@ -59,12 +59,12 @@ function StackBuilder() {
 
   function isCreateSucceeded(input) {
     if (input.status == "CREATE_COMPLETE" || input.status == "UPDATE_COMPLETE")  succeeded(input);
-    failed(input);
+    else failed(input);
   }
 
   function isDeleteSucceeded(input) {
     if (input.status == "DELETE_COMPLETE")  succeeded(input);
-    failed(input);
+    else failed(input);
   }
 
   me.launch = function(input, callback) {
@@ -80,10 +80,6 @@ function StackBuilder() {
 
     if(callback)  input.callback = callback;
     else input.callback = defaultCallback;
-
-    function errored(err) {
-      input.callback(err, null);
-    }
 
     var flows = [
       {func:stack.findStack, success:waitForCompleteBeforeCreate, failure:stack.createStack, error:errored},
