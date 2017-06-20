@@ -4,11 +4,13 @@
 exports.handler = (event, context) => {
 
   console.log('Received event:', JSON.stringify(event, null, 2));
-
+  var rules = event.rules;
+  console.log(rules);
   var method = event.httpMethod.toLowerCase();
   var paths = event.path.split('/');
   var path = paths[paths.length-1];
   var queryParams = event.queryStringParameters;
+  if (rules == null)  rules = {};
   if (queryParams == null)  queryParams = {};
   var postData = (event.body) ? event.body : {};
   if (postData && typeof(postData) == "string") postData = JSON.parse(postData);
@@ -40,6 +42,7 @@ exports.handler = (event, context) => {
     var params = postData;
     if (method == 'get') params = queryParams;
     params['credentials'] = credentials;
+    params['rules'] = rules;
     if (authorizer) params['userGuid'] = authorizer.user_guid;
     console.log('params : ', params);
     this[method](params, function(err, data) {
