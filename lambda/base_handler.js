@@ -4,6 +4,7 @@
 exports.handler = (event, context) => {
 
   console.log('Received event:', JSON.stringify(event, null, 2));
+  var customerAccount = event.customerAccount;
   var rules = event.rules;
   console.log(rules);
   var method = event.httpMethod.toLowerCase();
@@ -43,6 +44,7 @@ exports.handler = (event, context) => {
     if (method == 'get') params = queryParams;
     params['credentials'] = credentials;
     params['rules'] = rules;
+    params['customerAccount'] = customerAccount;
     if (authorizer) params['userGuid'] = authorizer.user_guid;
     console.log('params : ', params);
     this[method](params, function(err, data) {
