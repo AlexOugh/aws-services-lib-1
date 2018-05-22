@@ -363,6 +363,49 @@ console.log(params);
       }
     });
   }
+
+  me.setTopicAttributes = function(input, callback) {
+
+   var attributeName = (input.AttributeName) ? input.AttributeName : "Policy"; /*Valid is Policy | DisplayName | DeliveryPolicy */
+   var params = {
+	 AttributeName: attributeName, /* required */
+         AttributeValue: input.AttributeValue, 
+         TopicArn: input.topicArn /* required */
+      };
+   console.log(params);
+   var self = arguments.callee;
+
+    if (callback) {
+      var sns = me.findService(input);
+      sns.setTopicAttributes(params, callback);
+     if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data);           // successful response
+      return;
+    }
+
+    var sns = me.preRun(self, input);
+    sns.setTopicAttributes(params, me.callback);
+  }
+
+  me.getTopicAttributes = function(input, callback) {
+
+   var params = {
+         TopicArn: input.topicArn /* required */
+      };
+   console.log(params);
+   var self = arguments.callee;
+
+    if (callback) {
+      var sns = me.findService(input);
+      sns.getTopicAttributes(params, callback);
+     if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data);           // successful response
+      return;
+    }
+
+    var sns = me.preRun(self, input);
+    sns.getTopicAttributes(params, me.callback);
+  }
 }
 
 module.exports = AWSTopic
