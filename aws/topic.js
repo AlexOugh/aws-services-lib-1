@@ -393,6 +393,7 @@ console.log(params);
          TopicArn: input.topicArn /* required */
       };
    console.log(params);
+
    var self = arguments.callee;
 
     if (callback) {
@@ -403,8 +404,13 @@ console.log(params);
       return;
     }
 
+    self.addParams = function(data) {
+	 self.params.attributes = data.Attributes;
+    }
+
     var sns = me.preRun(self, input);
     sns.getTopicAttributes(params, me.callback);
+
   }
 }
 
