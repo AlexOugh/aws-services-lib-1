@@ -80,7 +80,7 @@ function AWSCloudTrail() {
     if (input.SnsTopicName)  params.SnsTopicName = input.params.SnsTopicName;
     if (input.multiRegion)  params.IsMultiRegionTrail = input.multiRegion;
     if (input.LogFileValidation) params.EnableLogFileValidation = input.LogFileValidation;
-    else params.EnableLogFileValidation = 'true';
+    else params.EnableLogFileValidation = true;
 
     var self = arguments.callee;
 
