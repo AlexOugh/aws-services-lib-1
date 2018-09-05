@@ -60,12 +60,13 @@ module.exports = {
     var invocationType= (input.invocationType) ? input.invocationType : "RequestResponse";
     var logType = (input.logType) ? input.logType : "Tail";
     var qualifier= (input.qualifier) ? input.qualifier : "$LATEST";
+    var payload = JSON.stringify(input.payload);
     var params = {
       FunctionName: input.functionArn,
       ClientContext: input.clientContext, 
       InvocationType: invocationType, 
       LogType: logType, 
-      Payload: new Buffer(input.payload, 'base64'), 
+      Payload: new Buffer(payload, 'base64'), 
       Qualifier: qualifier 
     };
     return lambda.invoke(params).promise();
