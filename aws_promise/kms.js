@@ -32,6 +32,7 @@ module.exports = {
 
   getkeyPolicy: function(input) {
     var kms = this.findService(input);
+    if ( ! input.policyName)  input.policyName = "default";
     var params = {
 	KeyId: input.keyId, /* required */ // The identifier of the CMK whose key policy you want to retrieve. You can use the key ID or the Amazon Resource Name (ARN) of the CMK.
 	PolicyName: input.policyName /* required */
@@ -41,6 +42,7 @@ module.exports = {
 
   putkeyPolicy: function(input) {
     var kms = this.findService(input);
+    if ( ! input.policyName)  input.policyName = "default";
     var params = {
 	KeyId: input.keyId, /* required */
 	Policy: input.policy, /* required */
