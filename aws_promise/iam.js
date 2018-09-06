@@ -5,7 +5,7 @@ var AWS = require('aws-sdk');
 module.exports = {
 
   findService: function(input) {
-    let iam;
+    const iam;
     if (input.creds) {
       let params = {credentials:input.creds};
       iam = new AWS.IAM(params);
@@ -16,7 +16,7 @@ module.exports = {
   },
 
   addInlineRolePolicy: function(input) {
-    let iam  = this.findService(input);
+    const iam  = this.findService(input);
     if (typeof input.policyDocument === 'undefined' || input.policyDocument === null) {
     let policy = {
           Version: "2012-10-17",
