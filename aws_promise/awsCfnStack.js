@@ -16,7 +16,7 @@ module.exports = {
   findStackOutputs: function(input) {
     const cfn = this.findService(input);
     let params = {
-        StackName: input.payload.stackName
+        StackName: input.stackName
     };
     return cfn.describeStacks(params).promise();
 }
