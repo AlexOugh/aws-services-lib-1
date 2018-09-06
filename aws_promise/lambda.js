@@ -66,7 +66,8 @@ module.exports = {
       ClientContext: input.clientContext, 
       InvocationType: invocationType, 
       LogType: logType, 
-      Payload: new Buffer(payload, 'base64'), 
+//      Payload: new Buffer(payload, 'base64'), 
+      Payload: payload, 
       Qualifier: qualifier 
     };
     return lambda.invoke(params).promise();
