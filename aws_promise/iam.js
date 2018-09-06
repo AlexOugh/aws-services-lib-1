@@ -1,12 +1,13 @@
+'use strict'
 
 var AWS = require('aws-sdk');
 
 module.exports = {
 
   findService: function(input) {
-    var iam;
+    let iam;
     if (input.creds) {
-      var params = {credentials:input.creds};
+      let params = {credentials:input.creds};
       iam = new AWS.IAM(params);
     }
     else
@@ -15,9 +16,9 @@ module.exports = {
   },
 
   addInlineRolePolicy: function(input) {
-    var iam  = this.findService(input);
+    let iam  = this.findService(input);
     if (typeof input.policyDocument === 'undefined' || input.policyDocument === null) {
-    var policy = {
+    let policy = {
           Version: "2012-10-17",
           Statement:{
               Effect: "Allow",
@@ -29,14 +30,14 @@ module.exports = {
           }
       }
     
-      var params = {
+      let params = {
           PolicyName: "S3AccessPolicy-"+ input.account,
           RoleName: input.roleName,
           PolicyDocument: JSON.stringify(policy)
       };
     } 
     else {
-      var params = {
+      let params = {
           PolicyName: input.roleName+"Policy",
           RoleName: input.roleName,
           PolicyDocument: JSON.stringify(input.policyDocument)
