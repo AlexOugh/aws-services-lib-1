@@ -22,5 +22,4 @@ module.exports = {
     };
     return cfn.describeStacks(params).promise();
 }
-
 }
