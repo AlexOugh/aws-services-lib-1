@@ -1,11 +1,11 @@
-'use strict'
+'use strict';
 
 const AWS = require('aws-sdk');
 
 module.exports = {
 
   findService: function(input) {
-    const iam;
+    let iam;
     if (input.creds) {
       let params = {credentials:input.creds};
       iam = new AWS.IAM(params);
