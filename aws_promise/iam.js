@@ -17,7 +17,10 @@ module.exports = {
 
   addInlineRolePolicy: function(input) {
     const iam  = this.findService(input);
-    if (typeof input.policyDocument === 'undefined' || input.policyDocument === null) {
+	let params;
+
+    if (input.policyDocument == 'undefined' || input.policyDocument == null) {
+	
     let policy = {
           Version: "2012-10-17",
           Statement:{
@@ -30,14 +33,14 @@ module.exports = {
           }
       }
     
-      let params = {
+      params = {
           PolicyName: "S3AccessPolicy-"+ input.account,
           RoleName: input.roleName,
           PolicyDocument: JSON.stringify(policy)
       };
     } 
     else {
-      let params = {
+      params = {
           PolicyName: input.roleName+"Policy",
           RoleName: input.roleName,
           PolicyDocument: JSON.stringify(input.policyDocument)
