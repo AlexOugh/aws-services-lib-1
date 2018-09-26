@@ -382,7 +382,10 @@ console.log(params);
     else     console.log(data);           // successful response
       return;
     }
-
+    self.addParams = function(data) {
+       console.log(data);
+       self.params.response = data.ResponseMetadata;
+    }
     var sns = me.preRun(self, input);
     sns.setTopicAttributes(params, me.callback);
   }
