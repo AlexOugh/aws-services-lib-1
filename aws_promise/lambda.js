@@ -1,4 +1,3 @@
-
 var AWS = require('aws-sdk');
 
 module.exports = {
@@ -55,6 +54,23 @@ module.exports = {
     return lambda.addPermission(params).promise();
   },
 
+  invokeFunction: function(input) {
+    var lambda = this.findService(input);
+    var invocationType= (input.invocationType) ? input.invocationType : "RequestResponse";
+    var logType = (input.logType) ? input.logType : "Tail";
+    var qualifier= (input.qualifier) ? input.qualifier : "$LATEST";
+    var payload = JSON.stringify(input.payload);
+    var params = {
+      FunctionName: input.functionArn,
+      ClientContext: input.clientContext, 
+      InvocationType: invocationType, 
+      LogType: logType, 
+      Payload: payload, 
+      Qualifier: qualifier 
+    };
+    return lambda.invoke(params).promise();
+  },
+  
   federate: function(input, callback) {
     var lambda = this.findService(input);
     var fedParams = {

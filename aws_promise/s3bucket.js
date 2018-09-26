@@ -47,7 +47,7 @@ module.exports = {
     var params = {
       Bucket: input.bucket,
       Key: input.key
-    }
+    };
     return s3.getObject(params).promise();
   },
 
@@ -76,6 +76,106 @@ module.exports = {
       params.ACL = input.acl;
     }
     return s3.putObject(params).promise();
-  }
+  },
 
+  addBucketPolicy: function(input) {
+    var s3 = this.findService(input);
+    var policy = {
+        "Id": "PolicyID-"+input.uid+"",
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": input.account,
+                "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject",
+                    "s3:PutObjectAcl"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::"+input.bucketName+"/*",
+                "Principal": {
+                    "AWS": input.account
+                }
+            }
+        ]
+    };
+
+    if (! input.policy ) input.policy = JSON.stringify(policy);
+    var params = {
+      Bucket: input.bucket,
+      Policy: input.policy
+    };
+    return s3.putBucketPolicy(params).promise();
+  },
+
+  getBucketPolicy: function(input) {
+    var s3 = this.findService(input);
+    var params = {
+      Bucket: input.bucket
+    }
+    return s3.getBucketPolicy(params).promise();
+  },
+
+  getBucketNotificationConfiguration: function(input) {
+    var s3 = this.findService(input);
+    var params = {
+      Bucket: input.bucket
+    };
+    return s3.getBucketNotificationConfiguration(params).promise();
+  },
+
+  addNotification: function(input) {
+    var s3 = this.findService(input);
+    var topicConfigurations = [];
+    var params = {
+      Bucket: input.bucket
+    };
+    if ( input.lambdafunctionArn ) {
+    	var lambdaFunctionConfigurations = [
+		{
+                    Events: [input.event],
+                    LambdaFunctionArn: input.lambdafunctionArn,
+                    Filter: {
+                        Key: {
+                            FilterRules: [
+                                { Name: 'Prefix', Value: input.prefix},
+                                { Name: 'Suffix', Value: input.suffix}
+                            ]
+                        }
+                    },
+                    Id: input.uid
+                }
+        ];
+	params.NotificationConfiguration = {LambdaFunctionConfigurations: lambdaFunctionConfigurations};
+    }
+    if ( input.topicArn ) {
+    	var topicConfigurations = [
+		{
+                    Events: [input.event],
+                    TopicArn: input.topicArn,
+                    Filter: {
+                        Key: {
+                            FilterRules: [
+                                { Name: 'Prefix', Value: input.prefix},
+                                { Name: 'Suffix', Value: input.suffix}
+                            ]
+                        }
+                    },
+                    Id: input.uid
+                }
+        ];
+	params.NotificationConfiguration = {TopicConfigurations: topicConfigurations};
+    }
+    return s3.putBucketNotificationConfiguration(params).promise();
+  },
+
+  uploadObject: function(input) {
+    var s3 = this.findService(input);
+    var params = {
+      Bucket: input.bucket,
+      Key: input.fileName,
+      Body: input.fileContent
+    };
+    return s3.upload(params).promise();
+  }
 }
