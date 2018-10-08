@@ -1,17 +1,14 @@
-
 'use strict';
+console.log('Loading function');
 
 exports.handler = (event, context) => {
 
   console.log('Received event:', JSON.stringify(event, null, 2));
-  var customerAccount = event.customerAccount;
-  var rules = event.rules;
-  console.log(rules);
+
   var method = event.httpMethod.toLowerCase();
   var paths = event.path.split('/');
   var path = paths[paths.length-1];
   var queryParams = event.queryStringParameters;
-  if (rules == null)  rules = {};
   if (queryParams == null)  queryParams = {};
   var postData = (event.body) ? event.body : {};
   if (postData && typeof(postData) == "string") postData = JSON.parse(postData);
@@ -43,19 +40,25 @@ exports.handler = (event, context) => {
     var params = postData;
     if (method == 'get') params = queryParams;
     params['credentials'] = credentials;
-    params['rules'] = rules;
-    params['customerAccount'] = customerAccount;
     if (authorizer) params['userGuid'] = authorizer.user_guid;
     console.log('params : ', params);
-    this[method](params, function(err, data) {
-      if (err) {
-        console.log(err);
-        sendFailureResponse({error: err}, 500, context, authorizer, resType);
-      }
-      else {
-        console.log(data);
-        sendSuccessResponse(data, context, authorizer, resType);
-      }
+
+    var controller = this.allocate_controller(path);
+    console.log("controller: " + controller);
+
+    // now check if the method exists in the found controller
+    if (!(method in controller)) {
+      sendNotPermittedMethodResponse(path, method, context, authorizer);
+      return;
+    }
+
+    // run the method
+    controller[method](params).then(data => {
+      console.log(data);
+      sendSuccessResponse(data, context, authorizer, resType);
+    }).catch(err => {
+      console.log(err);
+      sendFailureResponse({error: err}, 500, context, authorizer, resType);
     });
   }
   catch(err) {
