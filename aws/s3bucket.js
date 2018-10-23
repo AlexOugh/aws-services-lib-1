@@ -383,6 +383,94 @@ function AWSS3Bucket() {
     var s3 = me.preRun(self, input);
     s3.getObject(params, me.callback);
   }
+
+  me.updatePolicy = function(input, callback) {
+    // this logic put just for make this code work on both self & customer account
+    var OtherAccountcreds = input.creds;
+    if(input.selfAccount){
+      delete input.creds;
+    }
+
+    var params = {
+        Bucket: input.bucketName /* required */
+    };
+    var self = arguments.callee;
+
+    if (callback) {
+        var s3 = me.findService(input);
+        s3.getBucketPolicy(params, function(err, data){
+            var addStatement = true;
+            if (err) {
+                me.addPolicy(input, me.callback);
+            }else{
+                console.log(data.Policy);
+                var policy = JSON.parse(data.Policy),
+                    statements = policy.Statement,
+                    newStatement = {
+                        "Sid": input.account,
+                        "Effect": "Allow",
+                        "Principal": {
+                            "AWS": "arn:aws:iam::" + input.account + ":root"
+                        },
+                        "Action": "s3:GetObject",
+                        "Resource": "arn:aws:s3:::" + input.bucketName + "/*"
+                    };
+
+
+                for(var i in statements){
+                    if (statements[i].Sid == input.account) {
+                        addStatement = false;
+                    }
+                }
+
+                if(addStatement) statements.push(newStatement);
+                input.policyDocument = JSON.stringify(policy);
+                console.log("Policy changed to ", JSON.stringify(policy));
+                me.addPolicy(input, me.callback);
+            }
+        });
+        return;
+    }
+    self.addParams = function(data) {
+      if(input.selfAccount){
+        input.creds=OtherAccountcreds;
+      }
+    }
+
+    var s3 = me.preRun(self, input);
+    s3.getBucketPolicy(params, function(err, data){
+        var addStatement = true;
+        if (err) {
+            me.addPolicy(input, me.callback);
+        }else{
+            console.log(data.Policy);
+            var policy = JSON.parse(data.Policy),
+                statements = policy.Statement,
+                newStatement = {
+                    "Sid": input.account,
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "arn:aws:iam::" + input.account + ":root"
+                    },
+                    "Action": "s3:GetObject",
+                    "Resource": "arn:aws:s3:::" + input.bucketName + "/*"
+                };
+
+
+            for(var i in statements){
+                if (statements[i].Sid == input.account) {
+                    addStatement = false;
+                }
+            }
+
+            if(addStatement) statements.push(newStatement);
+            input.policyDocument = JSON.stringify(policy);
+            console.log("Policy changed to ", JSON.stringify(policy));
+            me.addPolicy(input, me.callback);
+        }
+    });
+    return;
+}
 }
 
 module.exports = AWSS3Bucket
